@@ -1,59 +1,71 @@
 /**
+ * Floating Header - jQuery Plugin
  * 
+ * @author  Matthieu Moquet <matt.ketmo@gmail.com>
+ * @link    http://github.com/MattKetmo/Floating-Header
  */
 (function($){
     /**
      * Main function 
      */
-    $.fn.floatHeader = function() {
-    
+    $.fn.floatHeader = function(params) {
+        
+        config = $.extend( {
+            headerSelector: 'header'
+        }, params);
+        
         return this.each(function(options){
             var self = $(this);
-            var headerIsVisible = false;
-            var floatingHeader = null;
             
-            // bind  to the scroll event
+            var hHeader         = self.children(config.headerSelector); // FIX autodetect > html5/table/class
+            var hFloatingHeader = null;
+            var headerIsVisible = false;
+            
+            //# bind  to the scroll event
             $(window).scroll(function() {
-                if (_isOnTop(self)) {
-                // header must be visible
+                if (_isOnTop(self)) { // FIX self to header
+                    //# header must be visible
                     if (!headerIsVisible) {
-                        // create floating header
-                        floatingHeader = _cloneHeader(self);
+                        //# create floating header
+                        hFloatingHeader = _cloneHeader(hHeader);
+                        self.prepend(hFloatingHeader);
                         headerIsVisible = true;
+                        
+                        hFloatingHeader.css('opacity','0.9');
+                        hFloatingHeader.css('position','fixed');
+                        hFloatingHeader.hover(
+                            function() {$(this).fadeTo('fast', 1);},
+                            function() {$(this).fadeTo('fast', 0.9);}
+                        );
                     }
-                    _ajustOnTop(floatingHeader, self.children('.entry'));
+                    _ajustOnTop(hFloatingHeader, self.children('.entry'));
                 } else {
-                    // header should not be visible
+                    //# header should not be visible
                     if (headerIsVisible) {
-                        // remove floating header
-                        floatingHeader.remove();
+                        //# remove floating header
+                        hFloatingHeader.remove();
                         headerIsVisible = false;
                     }
                 }
             });
         });
+
+        return this;
     };
     
     /**
-     * Show a clone of the header element on the top
+     * Clone of the header element on the top
      * 
      * @param element
      * @return The cloned header element
      */
-    function _cloneHeader(element) {
-        var header = element.children('header');
+    function _cloneHeader(header) {
         var clonedHeader = header.clone();
-        clonedHeader.css('width',header.width()+'px');
-        element.prepend(clonedHeader);
+        clonedHeader.css('width', header.width()+'px');
         
-        element.hover(
-            function() {$(this).fadeTo('fast', 1);},
-            function() {$(this).fadeTo('fast', 0.9);}
-        );
-    
         return clonedHeader;
     }
-  
+    
     /**
      * Ajust the header on the top of the screen
      * 
@@ -61,21 +73,20 @@
      * @param {Object} element
      */
     function _ajustOnTop(header, element) {
-        header.css('position','fixed');
-        header.css('opacity','0.9');
-        //header.css('border-bottom','solid #ddd 1px');
-
-        var top = $(window).scrollTop();
-        var y0  = $(element).offset().top;
-    
-        if (y0 + $(element).height() - top < header.height()) {
-          var topOffset = header.height() - (y0 + $(element).height() - top);
-          header.css('top','-'+topOffset+'px');
+        //# If element visible, header must be either stick on top of screen,
+        //# (i.e. position:fixed;top:0px;) or at the bottom of the element
+        //# (i.e. position:absolute;bottom:0px;)
+        var windowYOffset  = $(window).scrollTop();
+        var elementYOffset = $(element).offset().top;
+        var heightVisible  = elementYOffset + $(element).height() - windowYOffset;
+        
+        if (heightVisible < header.height()) {
+            var topOffset = heightVisible - header.height(); //# negative value
+            header.css('top',topOffset+'px');
         } else {
-          header.css('top','0px');
+            header.css('top','0px');
         }
-            
-      }
+    }
     
     /**
      * Check is the element "touch" the top of the screen
@@ -84,9 +95,12 @@
      * @return boolean
      */
     function _isOnTop(element) {
-        var top = $(window).scrollTop();
-        var y0  = $(element).offset().top;
+        var windowYOffset  = $(window).scrollTop();
+        var elementYOffset = $(element).offset().top;
         
-        return (y0 <= top) && top <= (y0 + $(element).height());
+        //# windowYOffset should be between the top and the bottom of the 
+        //# element (i.e. elementYOffset & elementYOffset + elementHeight)
+        return (elementYOffset <= windowYOffset) && 
+                (windowYOffset <= (elementYOffset + $(element).height()));
     }
 }(jQuery));
