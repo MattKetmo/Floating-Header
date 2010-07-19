@@ -1,7 +1,7 @@
 /**
  * Floating Header - jQuery Plugin
  * 
- * @author  Matt Ketmo <matt.ketmo@gmail.com>
+ * @author  Matthieu Moquet <matt.ketmo@gmail.com>
  * @link    http://github.com/MattKetmo/Floating-Header
  */
 (function($){
