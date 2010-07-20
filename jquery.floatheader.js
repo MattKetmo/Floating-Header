@@ -17,6 +17,7 @@ $.fn.floatHeader = function(params) {
     }, params);
     
     return this.each(function(options){
+        //# Handles
         var self    = $(this);
         // FIXME autodetect from self type > html5/table/class
         var hHeader = self.children(config.headerSelector);
@@ -62,8 +63,6 @@ $.fn.floatHeader = function(params) {
             }
         });
     });
-
-    return this;
 };
 
 /**
@@ -90,9 +89,9 @@ function _ajustOnTop(header, element) {
     //# If element visible, header must be either stick on top of screen,
     //# (i.e. position:fixed;top:0px;) or at the bottom of the element
     //# (i.e. position:absolute;bottom:0px;)
-    var windowYOffset  = $(window).scrollTop();
-    var elementYOffset = $(element).offset().top;
-    var heightVisible  = elementYOffset + $(element).height() - windowYOffset;
+    var windowTop     = $(window).scrollTop();
+    var elementTop    = $(element).offset().top;
+    var heightVisible = elementTop + $(element).height() - windowTop;
     
     if (heightVisible < header.height()) {
         var topOffset = heightVisible - header.height(); //# negative value
@@ -108,19 +107,22 @@ function _ajustOnTop(header, element) {
 }
 
 /**
- * Check is the element "touch" the top of the screen
+ * Check is the element "touch" the top of the "visible screen"
  * 
  * @param element The element to check
  * @return {boolean}
  */
 function _isOnTop(element) {
-    var windowYOffset  = $(window).scrollTop();
-    var elementYOffset = $(element).offset().top;
+    //# windowTop is the position of the top of the "visible screen"
+    //# elementTop is the position of the top of the element
+    //# elementBottom is the position of the bottom of the element
+    var windowTop     = $(window).scrollTop();
+    var elementTop    = $(element).offset().top;
+    var elementBottom = elementTop + $(element).height();
     
-    //# windowYOffset should be between the top and the bottom of the 
-    //# element (i.e. elementYOffset & elementYOffset + elementHeight)
-    return (elementYOffset <= windowYOffset) && 
-            (windowYOffset <= (elementYOffset + $(element).height()));
+    //# windowTop should be between the top and the bottom of the 
+    //# element (i.e. elementTop & elementBottom)
+    return (elementTop <= windowTop) && (windowTop <= elementBottom);
 }
 
 }(jQuery));
