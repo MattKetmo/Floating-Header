@@ -1,7 +1,7 @@
 /**
  * Floating Header - jQuery Plugin
  * 
- * @author  Matthieu Moquet <matt.ketmo@gmail.com>
+ * @author  Matt Ketmo <matt.ketmo@gmail.com>
  * @link    http://github.com/MattKetmo/Floating-Header
  */
 (function($){
@@ -12,13 +12,15 @@ $.fn.floatHeader = function(params) {
     
     config = $.extend( {
         headerSelector: 'header',
+        bodySelector:   '.entry',
         footerSelector: 'footer'
     }, params);
     
     return this.each(function(options){
         var self    = $(this);
-        var hHeader = self.children(config.headerSelector); // FIX autodetect > html5/table/class
-        var hBody   = null;
+        // FIX autodetect from self type > html5/table/class
+        var hHeader = self.children(config.headerSelector);
+        var hBody   = self.children(config.bodySelector);
         var hFooter = self.children(config.footerSelector);
 
         var hFloatingHeader = null;
@@ -26,11 +28,11 @@ $.fn.floatHeader = function(params) {
         
         //# bind  to the scroll event
         $(window).scroll(function() {
-            if (_isOnTop(self)) { // FIX self to header
+            if (_isOnTop(self)) {
                 //# header must be visible
                 if (!headerIsVisible) {
                     //# create floating header
-                    hFloatingHeader = _cloneHeader(hHeader);
+                    hFloatingHeader = _cloneElement(hHeader);
                     
                     //# insert floating header at the end of element,
                     //# or before footer if existing
@@ -42,14 +44,14 @@ $.fn.floatHeader = function(params) {
 
                     headerIsVisible = true;
                     
+                    // FIX should not be here
                     hFloatingHeader.css('opacity','0.9');
-                    hFloatingHeader.css('position','fixed');
                     hFloatingHeader.hover(
                         function() {$(this).fadeTo('fast', 1);},
                         function() {$(this).fadeTo('fast', 0.9);}
                     );
                 }
-                _ajustOnTop(hFloatingHeader, self.children('.entry'));
+                _ajustOnTop(hFloatingHeader, hBody);
             } else {
                 //# header should not be visible
                 if (headerIsVisible) {
@@ -65,16 +67,17 @@ $.fn.floatHeader = function(params) {
 };
 
 /**
- * Clone of the header element on the top
+ * Clone element, keeping same width and height of the original
  * 
- * @param element
- * @return The cloned header element
+ * @param element The element to clone
+ * @return The cloned element
  */
-function _cloneHeader(header) {
-    var clonedHeader = header.clone();
-    clonedHeader.css('width', header.width()+'px');
+function _cloneElement(element) {
+    var clonedElement = element.clone();
+    clonedElement.css('width', element.width()+'px');
+    clonedElement.css('height', element.height()+'px');
     
-    return clonedHeader;
+    return clonedElement;
 }
 
 /**
@@ -94,8 +97,12 @@ function _ajustOnTop(header, element) {
     if (heightVisible < header.height()) {
         var topOffset = heightVisible - header.height(); //# negative value
         header.css('top',topOffset+'px');
+        //header.css('top','');
+        //header.css('bottom','0px');
+        //header.css('position','absolute');
     } else {
         header.css('top','0px');
+        header.css('position','fixed');
     }
 }
 
@@ -103,7 +110,7 @@ function _ajustOnTop(header, element) {
  * Check is the element "touch" the top of the screen
  * 
  * @param element The element to check
- * @return boolean
+ * @return {boolean}
  */
 function _isOnTop(element) {
     var windowYOffset  = $(window).scrollTop();
