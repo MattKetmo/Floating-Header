@@ -18,7 +18,7 @@ $.fn.floatHeader = function(params) {
     
     return this.each(function(options){
         var self    = $(this);
-        // FIX autodetect from self type > html5/table/class
+        // FIXME autodetect from self type > html5/table/class
         var hHeader = self.children(config.headerSelector);
         var hBody   = self.children(config.bodySelector);
         var hFooter = self.children(config.footerSelector);
@@ -44,7 +44,7 @@ $.fn.floatHeader = function(params) {
 
                     headerIsVisible = true;
                     
-                    // FIX should not be here
+                    // FIXME should not be here
                     hFloatingHeader.css('opacity','0.9');
                     hFloatingHeader.hover(
                         function() {$(this).fadeTo('fast', 1);},
@@ -97,6 +97,7 @@ function _ajustOnTop(header, element) {
     if (heightVisible < header.height()) {
         var topOffset = heightVisible - header.height(); //# negative value
         header.css('top',topOffset+'px');
+        header.css('position','fixed');
         //header.css('top','');
         //header.css('bottom','0px');
         //header.css('position','absolute');
